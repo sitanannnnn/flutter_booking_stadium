@@ -13,7 +13,7 @@ Future<void> normalDialog(BuildContext context, String message) async {
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'OK',
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: Colors.blue),
                       )),
                 ],
               )

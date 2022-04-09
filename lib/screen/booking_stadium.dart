@@ -26,7 +26,7 @@ class _BookingStadiumState extends State<BookingStadium> {
   StadiumModel? stadiumModel;
   List<SubStadiumModel> substadiumModels = [];
   List<TimeStadiumModel> timestadiumModels = [];
-  String? std_id, time, date, bkt_id;
+  String? std_id, time, date, bkt_id, getTime;
   bool loadStatus = true;
   @override
   void initState() {
@@ -62,6 +62,7 @@ class _BookingStadiumState extends State<BookingStadium> {
                     time: time,
                     bkt_id: bkt_id,
                     std_id: std_id,
+                    getTime: getTime,
                   )));
     } else {
       showDialog(
@@ -294,6 +295,7 @@ class _BookingStadiumState extends State<BookingStadium> {
                       borderRadius: BorderRadius.all(Radius.circular(10)))),
               onPressed: () {
                 bkt_id = timestadiumModels[index2].bktId;
+                getTime = timestadiumModels[index2].bktStartTime;
 
                 time = timestadiumModels[index2]
                     .bktStartTime

@@ -172,7 +172,7 @@ class _BookingDetailHistoryState extends State<BookingDetailHistory> {
                         child: Text(
                           historyBookingStadiumModel!.stdProcedure!,
                           style: const TextStyle(fontSize: 20),
-                          maxLines: 3,
+                          maxLines: 100,
                           overflow: TextOverflow.ellipsis,
                         ),
                       )

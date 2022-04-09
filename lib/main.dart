@@ -1,3 +1,4 @@
+import 'package:booking_stadium/constant/bgcolor.dart';
 import 'package:booking_stadium/screen/login.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         fontFamily: 'Sarabun',
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
       ),
       home: const Login(),
     );

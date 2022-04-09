@@ -17,9 +17,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentIndex = 0;
   final screens = [
-    const ShowStadium(),
-    const MyBooking(),
-    const History(),
+    ShowStadium(),
+    MyBooking(),
+    History(),
     Information(
       userModel: UserModel(),
     )

@@ -4,13 +4,17 @@ import 'dart:developer';
 import 'package:booking_stadium/constant/bgcolor.dart';
 import 'package:booking_stadium/constant/env.dart';
 import 'package:booking_stadium/constant/my_style.dart';
+import 'package:booking_stadium/constant/show_image.dart';
 import 'package:booking_stadium/model/show_substadium_model.dart';
 import 'package:booking_stadium/model/stadium_close_model.dart';
 import 'package:booking_stadium/model/stadium_model.dart';
 import 'package:booking_stadium/screen/show_datatable_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 import 'booking_stadium.dart';
 
@@ -24,9 +28,8 @@ class ShowStadium extends StatefulWidget {
 class _ShowStadiumState extends State<ShowStadium> {
   @override
   List<StadiumModel> stadiumModels = [];
-  List<StadiumCloseModel> stadiumcloseModels = [];
   List<ShowSubstadiumModel> showsubstadiumModels = [];
-  String? datenow, staId, timeopen, timeclose, timenow, checkTime, std_id;
+  String? datenow, staId, checkTime, std_id, date_Time;
   List<String> openstatus = [];
   bool loadStatus = true;
   bool substd_id = true;
@@ -38,30 +41,23 @@ class _ShowStadiumState extends State<ShowStadium> {
   @override
   void initState() {
     super.initState();
-    readStadium().then((value) => readStadiumClose().then((value) {
-          setState(() {
-            loadStatus = false;
-          });
-        }));
+
+    DateTime dateTime = DateTime.now();
+    date_Time = DateFormat('yyyy-MM-dd').format(dateTime);
+    datenow = DateFormat('dd/MM/yyyy').format(dateTime);
+
+    print('date now $date_Time');
+    readStadium().then((value) {
+      setState(() {
+        loadStatus = false;
+      });
+    });
     //เซตเวลาเริมต้นเป็น 9.00
     startTime =
         DateTime(currentTime.year, currentTime.month, currentTime.day, 09, 00);
     //เซตเวลาสิ้นสุดเป็น 15.00
     endTime =
         DateTime(currentTime.year, currentTime.month, currentTime.day, 15, 00);
-    DateTime dateTime = DateTime.now();
-    datenow = DateFormat('dd/MM/yyyy').format(dateTime);
-
-    // print('date now $datenow');
-    // TimeOfDay now = TimeOfDay.now();
-    // timenow = now.toString().substring(10, 15);
-    // print("now==>$timenow");
-    // const TimeOfDay open = TimeOfDay(hour: 9, minute: 0); // 3:00pm
-    // timeopen = open.toString().substring(10, 15);
-    // print("Time open==>$timeopen");
-    // const TimeOfDay close = TimeOfDay(hour: 15, minute: 0);
-    // timeclose = close.toString().substring(10, 15);
-    // print("Tome close==>$timeclose");
   }
 
   //สร้างฟังก์ชันตรวจสอบเวลา โดยรับค่าเป็นเวลาปัจจุบันที่กดปุ่ม (ตอนกดปุ๋มให้เซตสเตตัวแปร  currentTime = DateTime.now(); อีกรอบ แล้วส่งค่าที่เซ็ตสเตท currentTime มาในฟังก์ชันนี้เพื่อเปรียบเทียบ รีเทินค่า true คือ จองได้อยู่ในช่วงเวลา รีเทิน false คือ จองไม่ได้ ไม่อยู่ใชาวงเวลา)
@@ -82,7 +78,8 @@ class _ShowStadiumState extends State<ShowStadium> {
 
 //อ่านข้อมูลสนามทั้งหมด
   Future<Null> readStadium() async {
-    String url = '${Env().domaingetData}/getStadium.php?isAdd=true';
+    String url =
+        '${Env().domaingetData}/getStadiumWhereDateTime.php?isAdd=true&dateTime=$date_Time';
     Response response = await Dio().get(url);
     // print('res = $response');
 
@@ -92,52 +89,50 @@ class _ShowStadiumState extends State<ShowStadium> {
       StadiumModel stadiumModel = StadiumModel.fromJson(map);
       setState(() {
         stadiumModels.add(stadiumModel);
-        // staId = stadiumModel.stdId;
-        // print("id-->$staId");
       });
     }
   }
 
-//อ่านข้อมูลสนามที่ปิด
-  Future<Null> readStadiumClose() async {
-    for (int index = 0; index < stadiumModels.length; index++) {
-      String? id = stadiumModels[index].stdId;
-      print("std_id-->$id");
-      String url =
-          '${Env().domaingetData}/getStadium_close.php?isAdd=true&std_id=$id&stdclosed_date =$datenow';
-      Response response = await Dio().get(url);
-      print('res = $response');
-      if (response.toString() == 'null') {
-        openstatus.add(id!);
-      } else {
-        var result = json.decode(response.data);
-        print('result close = $result');
-        for (var map in result) {
-          StadiumCloseModel stadiumCloseModel = StadiumCloseModel.fromJson(map);
-          setState(() {
-            stadiumcloseModels.add(stadiumCloseModel);
-          });
-        }
-      }
-    }
-    print("openstatus-->$openstatus");
+// //อ่านข้อมูลสนามที่ปิด
+//   Future<Null> readStadiumClose() async {
+//     for (int index = 0; index < stadiumModels.length; index++) {
+//       String? id = stadiumModels[index].stdId;
+//       print("std_id-->$id");
+//       String url =
+//           '${Env().domaingetData}/getStadium_close.php?isAdd=true&std_id=$id&stdclosed_date =$datenow';
+//       Response response = await Dio().get(url);
+//       print('res = $response');
+//       if (response.toString() == 'null') {
+//         openstatus.add(id!);
+//       } else {
+//         var result = json.decode(response.data);
+//         print('result close = $result');
+//         for (var map in result) {
+//           StadiumCloseModel stadiumCloseModel = StadiumCloseModel.fromJson(map);
+//           setState(() {
+//             stadiumcloseModels.add(stadiumCloseModel);
+//           });
+//         }
+//       }
+//     }
+//     print("openstatus-->$openstatus");
 
-    // inspect(stadiumcloseModels);
-  }
+//     // inspect(stadiumcloseModels);
+//   }
 
-  //เช็คสนามเปิด-ปิด
-  bool checkStatus(String id) {
-    for (var i = 0; i < openstatus.length; i++) {
-      print("aomam==>${openstatus[i]}");
-      if (id == openstatus[i]) {
-        print("true");
-        return true;
-        break;
-        //มีเปิดสนาม
-      }
-    }
-    return false;
-  }
+  // //เช็คสนามเปิด-ปิด
+  // bool checkStatus(String id) {
+  //   for (var i = 0; i < openstatus.length; i++) {
+  //     print("aomam==>${openstatus[i]}");
+  //     if (id == openstatus[i]) {
+  //       print("true");
+  //       return true;
+  //       break;
+  //       //มีเปิดสนาม
+  //     }
+  //   }
+  //   return false;
+  // }
 
   //อ่านข้อมูลสนามที่มีสนามย่อย
   Future<Null> readSubStadium() async {
@@ -214,16 +209,35 @@ class _ShowStadiumState extends State<ShowStadium> {
                                       Row(
                                         children: [
                                           Container(
-                                            width: 100,
+                                            width: 120,
                                             height: 100,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(0),
-                                                image: DecorationImage(
-                                                    image: NetworkImage(
-                                                      '${Env().domaingetpicture}${stadiumModels[index].stdUrlPicture}',
-                                                    ),
-                                                    fit: BoxFit.cover)),
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  '${Env().domaingetpicture}${stadiumModels[index].stdUrlPicture}',
+
+                                              //filterQuality: FilterQuality.high,
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            0),
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(
+                                                        '${Env().domaingetpicture}${stadiumModels[index].stdUrlPicture}',
+                                                      ),
+                                                      fit: BoxFit.cover,
+                                                    )),
+                                              ),
+                                              placeholder: (context, url) =>
+                                                  MyStyle().showProgress(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      ShowImage(
+                                                          path: MyStyle
+                                                              .image_stadium),
+                                            ),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -324,17 +338,18 @@ class _ShowStadiumState extends State<ShowStadium> {
                                                       const SizedBox(
                                                         width: 10,
                                                       ),
-                                                      checkStatus(stadiumModels[
-                                                                  index]
-                                                              .stdId!)
-                                                          ? const Text(
+                                                      stadiumModels[index]
+                                                                  .stdclosedId
+                                                                  .toString() ==
+                                                              'null'
+                                                          ? Text(
                                                               "เปิด",
                                                               style: TextStyle(
                                                                   fontSize: 20,
                                                                   color: Colors
                                                                       .green),
                                                             )
-                                                          : const Text(
+                                                          : Text(
                                                               "ปิด",
                                                               style: TextStyle(
                                                                   fontSize: 20,
@@ -350,11 +365,41 @@ class _ShowStadiumState extends State<ShowStadium> {
                                                         style: TextStyle(
                                                             fontSize: 20),
                                                       ),
-                                                      // Text(stadiumcloseModels[
-                                                      //         index]
-                                                      //     .stdclosedNote!)
+                                                      stadiumModels[index]
+                                                                  .stdclosedNote
+                                                                  .toString() ==
+                                                              'null'
+                                                          ? Text("-",
+                                                              style: TextStyle(
+                                                                fontSize: 20,
+                                                              ))
+                                                          : Text("")
                                                     ],
                                                   ),
+                                                  Row(
+                                                    children: [
+                                                      stadiumModels[index]
+                                                                  .stdclosedNote
+                                                                  .toString() ==
+                                                              'null'
+                                                          ? Text("",
+                                                              style: TextStyle(
+                                                                fontSize: 20,
+                                                              ))
+                                                          : Expanded(
+                                                              child: Text(
+                                                                  stadiumModels[
+                                                                          index]
+                                                                      .stdclosedNote!,
+                                                                  maxLines: 5,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          20,
+                                                                      color: Colors
+                                                                          .red)),
+                                                            )
+                                                    ],
+                                                  )
                                                 ],
                                               ),
                                             ),
@@ -365,114 +410,126 @@ class _ShowStadiumState extends State<ShowStadium> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.end,
                                         children: [
-                                          ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                  primary: Colors.green,
-                                                  onPrimary: Colors.white,
-                                                  shape:
-                                                      const RoundedRectangleBorder(
+                                          stadiumModels[index]
+                                                      .stdclosedId
+                                                      .toString() ==
+                                                  'null'
+                                              ? ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                      primary: Colors.green,
+                                                      onPrimary: Colors.white,
+                                                      shape: const RoundedRectangleBorder(
                                                           borderRadius:
                                                               BorderRadius.all(
                                                                   Radius
                                                                       .circular(
                                                                           15)))),
-                                              onPressed: () {
-                                                print(
-                                                    "you click index --> $index");
-
-                                                print(
-                                                    "check==>$checkTimeBooking(currenttTimeOnTap)");
-                                                checkTimeBooking(currentTime)
-                                                    ? Navigator.push(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      currentTime =
+                                                          DateTime.now();
+                                                      print(
+                                                          "time==>$currentTime");
+                                                    });
+                                                    print(
+                                                        "you click index --> $index");
+                                                    checkTimeBooking(
+                                                            currentTime)
+                                                        ? Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder: (context) =>
+                                                                    BookingStadium(
+                                                                        stadiumModel:
+                                                                            stadiumModels[
+                                                                                index])))
+                                                        : showTopSnackBar(
+                                                            context,
+                                                            CustomSnackBar
+                                                                .error(
+                                                              message:
+                                                                  "กรุณาจองสนามภายในเวลา 09.00 น -15.00 น",
+                                                            ));
+                                                    // showDialog(
+                                                    //     context: context,
+                                                    //     barrierDismissible:
+                                                    //         false, // user must tap button!
+                                                    //     builder:
+                                                    //         (BuildContext
+                                                    //             context) {
+                                                    //       return AlertDialog(
+                                                    //         content:
+                                                    //             SingleChildScrollView(
+                                                    //           child:
+                                                    //               ListBody(
+                                                    //             children: [
+                                                    //               Text(
+                                                    //                   "กรุณาจองสนามกีฬาภายในเวลา",
+                                                    //                   style: const TextStyle(
+                                                    //                       fontSize: 20,
+                                                    //                       fontWeight: FontWeight.bold)),
+                                                    //               Text(
+                                                    //                   "09.00 น -15.00 น",
+                                                    //                   style: const TextStyle(
+                                                    //                       fontSize: 20,
+                                                    //                       color: Colors.red)),
+                                                    //             ],
+                                                    //           ),
+                                                    //         ),
+                                                    //         actions: <
+                                                    //             Widget>[
+                                                    //           TextButton(
+                                                    //             child: const Text(
+                                                    //                 'ตกลง',
+                                                    //                 style: TextStyle(
+                                                    //                     fontSize:
+                                                    //                         20,
+                                                    //                     color:
+                                                    //                         Colors.blue)),
+                                                    //             onPressed:
+                                                    //                 () {
+                                                    //               Navigator.of(
+                                                    //                       context)
+                                                    //                   .pop();
+                                                    //             },
+                                                    //           ),
+                                                    //         ],
+                                                    //       );
+                                                    //     },
+                                                    //   );
+                                                  },
+                                                  child: const Text("จอง"))
+                                              : Text(""),
+                                          const SizedBox(width: 5),
+                                          stadiumModels[index]
+                                                      .stdclosedId
+                                                      .toString() ==
+                                                  'null'
+                                              ? ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                      primary: Colors.green,
+                                                      onPrimary: Colors.white,
+                                                      shape: const RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          15)))),
+                                                  onPressed: () {
+                                                    // readSubStadium();
+                                                    Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
                                                             builder: (context) =>
-                                                                BookingStadium(
-                                                                    stadiumModel:
-                                                                        stadiumModels[
-                                                                            index])))
-                                                    : showDialog(
-                                                        context: context,
-                                                        barrierDismissible:
-                                                            false, // user must tap button!
-                                                        builder: (BuildContext
-                                                            context) {
-                                                          return AlertDialog(
-                                                            title: const Text(
-                                                              'ไม่สามารถจองสนามได้',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                            ),
-                                                            content:
-                                                                SingleChildScrollView(
-                                                              child: ListBody(
-                                                                children: [
-                                                                  Text(
-                                                                      "กรุณาจองสนามกีฬาเวลา",
-                                                                      style: const TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          fontWeight:
-                                                                              FontWeight.bold)),
-                                                                  Text(
-                                                                      "09.00 น -15.00 น",
-                                                                      style: const TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          color:
-                                                                              Colors.red)),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                child: const Text(
-                                                                    'ตกลง',
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            20,
-                                                                        color: Colors
-                                                                            .red)),
-                                                                onPressed: () {
-                                                                  Navigator.of(
-                                                                          context)
-                                                                      .pop();
-                                                                },
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                              },
-                                              child: const Text("จอง")),
-                                          const SizedBox(width: 5),
-                                          ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                  primary: Colors.green,
-                                                  onPrimary: Colors.white,
-                                                  shape:
-                                                      const RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          15)))),
-                                              onPressed: () {
-                                                // readSubStadium();
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            ShowDataTableScreen(
-                                                              std_id:
-                                                                  stadiumModels[
+                                                                ShowDataTableScreen(
+                                                                  std_id: stadiumModels[
                                                                           index]
                                                                       .stdId,
-                                                            )));
-                                              },
-                                              child: const Text("ดูรายชื่อ"))
+                                                                )));
+                                                  },
+                                                  child:
+                                                      const Text("ดูรายชื่อ"))
+                                              : Text("")
                                         ],
                                       )
                                     ],

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:adaptive_scrollbar/adaptive_scrollbar.dart';
 import 'package:booking_stadium/constant/bgcolor.dart';
 import 'package:booking_stadium/constant/env.dart';
+import 'package:booking_stadium/constant/my_style.dart';
 import 'package:booking_stadium/constant/normal_dialog.dart';
 import 'package:booking_stadium/model/field_booking_list_model.dart';
 import 'package:booking_stadium/model/field_booking_list_no_substadium_model.dart';
@@ -34,9 +35,21 @@ class _ShowDataTableScreenState extends State<ShowDataTableScreen> {
     std_id = widget.std_id;
 
     print("std_id===>$std_id");
-    readFieldBookingHaveSubStadium();
-    readFieldBookingNoSubStadium();
-    readSubStadium();
+    readFieldBookingHaveSubStadium().then((value) {
+      setState(() {
+        loadDataStatus = false;
+      });
+    });
+    readFieldBookingNoSubStadium().then((value) {
+      setState(() {
+        loadDataStatus = false;
+      });
+    });
+    readSubStadium().then((value) {
+      setState(() {
+        loadDataStatus = false;
+      });
+    });
   }
 
   //อ่านข้อมูลสนามที่มีสนามย่อย
@@ -100,53 +113,55 @@ class _ShowDataTableScreenState extends State<ShowDataTableScreen> {
           centerTitle: true,
           backgroundColor: kPrimaryColor,
           title: const Text("รายชื่อการจองสนาม")),
-      body: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: AdaptiveScrollbar(
-          width: 8,
-          underColor: Colors.blueGrey.withOpacity(0.3),
-          sliderDefaultColor: Colors.grey.withOpacity(0.7),
-          sliderActiveColor: Colors.grey,
-          controller: _verticalScrollController,
-          child: AdaptiveScrollbar(
-            width: 8,
-            controller: _horizontalScrollController,
-            position: ScrollbarPosition.bottom,
-            underColor: Colors.blueGrey.withOpacity(0.3),
-            sliderDefaultColor: Colors.grey.withOpacity(0.7),
-            sliderActiveColor: Colors.grey,
-            child: SingleChildScrollView(
-              controller: _verticalScrollController,
-              scrollDirection: Axis.vertical,
-              child: SingleChildScrollView(
+      body: loadDataStatus
+          ? MyStyle().showProgress()
+          : Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: AdaptiveScrollbar(
+                width: 8,
+                underColor: Colors.blueGrey.withOpacity(0.3),
+                sliderDefaultColor: Colors.grey.withOpacity(0.7),
+                sliderActiveColor: Colors.grey,
+                controller: _verticalScrollController,
+                child: AdaptiveScrollbar(
+                  width: 8,
                   controller: _horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                      columns: const <DataColumn>[
-                        DataColumn(
-                          label: Text('สนามย่อย',
-                              style: const TextStyle(fontSize: 20)),
-                        ),
-                        DataColumn(
-                          label: Text('เวลา',
-                              style: const TextStyle(fontSize: 20)),
-                        ),
-                        DataColumn(
-                          label: Text('รายชื่อ',
-                              style: const TextStyle(fontSize: 20)),
-                        ),
-                        DataColumn(
-                          label: Text('สถานะ',
-                              style: const TextStyle(fontSize: 20)),
-                        ),
-                      ],
-                      rows: substd_id == true
-                          ? buildFieldBookingList()
-                          : buildFieldBookingListNoSubStadium())),
+                  position: ScrollbarPosition.bottom,
+                  underColor: Colors.blueGrey.withOpacity(0.3),
+                  sliderDefaultColor: Colors.grey.withOpacity(0.7),
+                  sliderActiveColor: Colors.grey,
+                  child: SingleChildScrollView(
+                    controller: _verticalScrollController,
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                        controller: _horizontalScrollController,
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                            columns: const <DataColumn>[
+                              DataColumn(
+                                label: Text('สนามย่อย',
+                                    style: const TextStyle(fontSize: 20)),
+                              ),
+                              DataColumn(
+                                label: Text('เวลา',
+                                    style: const TextStyle(fontSize: 20)),
+                              ),
+                              DataColumn(
+                                label: Text('รายชื่อ',
+                                    style: const TextStyle(fontSize: 20)),
+                              ),
+                              DataColumn(
+                                label: Text('สถานะ',
+                                    style: const TextStyle(fontSize: 20)),
+                              ),
+                            ],
+                            rows: substd_id == true
+                                ? buildFieldBookingList()
+                                : buildFieldBookingListNoSubStadium())),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -159,7 +174,7 @@ class _ShowDataTableScreenState extends State<ShowDataTableScreen> {
             '${fliedbookinglist.bktStartTime.toString().substring(0, 5)} - ${fliedbookinglist.bktEndTime.toString().substring(0, 5)} ')),
         DataCell(TextButton(
           onPressed: () {
-            // bkd_id = fliedbookinglist.bkdId;
+            bkd_id = fliedbookinglist.bkdId.toString();
             // for (int index = 0;
             //     index < fieldbookinglistModels.length;
             //     index++) {
@@ -170,7 +185,9 @@ class _ShowDataTableScreenState extends State<ShowDataTableScreen> {
                 : Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ShowNameBooking()));
+                        builder: (context) => ShowNameBooking(
+                              bkd_id: bkd_id!,
+                            )));
             //}
           },
           child: const Text("ดูรายชื่อ"),
@@ -205,7 +222,9 @@ class _ShowDataTableScreenState extends State<ShowDataTableScreen> {
                 : Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ShowNameBooking()));
+                        builder: (context) => ShowNameBooking(
+                              bkd_id: bkd_id!,
+                            )));
           },
           child: const Text("ดูรายชื่อ"),
         )),

@@ -4,13 +4,15 @@ import 'package:booking_stadium/constant/bgcolor.dart';
 import 'package:booking_stadium/constant/env.dart';
 import 'package:booking_stadium/constant/my_style.dart';
 import 'package:booking_stadium/model/booking_stadium_model.dart';
+import 'package:booking_stadium/screen/home.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookinDetail extends StatefulWidget {
-  const BookinDetail({Key? key}) : super(key: key);
+  final get_Time;
+  const BookinDetail({Key? key, this.get_Time}) : super(key: key);
 
   @override
   State<BookinDetail> createState() => _BookinDetailState();
@@ -19,7 +21,7 @@ class BookinDetail extends StatefulWidget {
 class _BookinDetailState extends State<BookinDetail> {
   List<BookingStadiumModel> bookingstadiumModels = [];
   bool loadStatus = true;
-  String? date, bkd_id, checkTime;
+  String? date, bkd_id, checkTime, getTime;
   List<List<String>> listnameMembers = [];
   List<String> namemembers = [];
 
@@ -27,6 +29,8 @@ class _BookinDetailState extends State<BookinDetail> {
   @override
   void initState() {
     super.initState();
+    getTime = widget.get_Time;
+    print("Get Time==>$getTime");
     readBookingStadium().then((value) {
       setState(() {
         loadStatus = false;
@@ -40,7 +44,7 @@ class _BookinDetailState extends State<BookinDetail> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? stu_id = preferences.getString("stu_id");
     String url =
-        '${Env().domaingetData}/getBookingStadium.php?isAdd=true&stu_id=$stu_id&bkd_date=$date';
+        '${Env().domaingetData}/getBookingStadium.php?isAdd=true&stu_id=$stu_id&bkd_date=$date&bkd_time=$getTime';
     Response response = await Dio().get(url);
     // print('res = $response');
     if (response.toString() == 'null') {
@@ -89,14 +93,7 @@ class _BookinDetailState extends State<BookinDetail> {
           backgroundColor: kPrimaryColor,
           title: const Text("รายละเอียดการจองสนาม")),
       body: bookingstadiumModels.length == 0
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("ไม่มีรายการจอง", style: const TextStyle(fontSize: 20))
-                ],
-              ),
-            )
+          ? MyStyle().showProgress()
           : SingleChildScrollView(
               child: buildDetail(),
             ),
@@ -215,7 +212,7 @@ class _BookinDetailState extends State<BookinDetail> {
                         child: Text(
                           bookingstadiumModels[index].stdProcedure!,
                           style: const TextStyle(fontSize: 20),
-                          maxLines: 3,
+                          maxLines: 100,
                           overflow: TextOverflow.ellipsis,
                         ),
                       )
@@ -243,8 +240,11 @@ class _BookinDetailState extends State<BookinDetail> {
                             shape: const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(15)))),
-                        onPressed: () {},
-                        child: const Text("กลับไปหน้ารายหน้า",
+                        onPressed: () {
+                          Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: (context) => Home()));
+                        },
+                        child: const Text("กลับไปหน้าหลัก",
                             style: TextStyle(
                                 fontSize: 25, fontWeight: FontWeight.w200))),
                   )

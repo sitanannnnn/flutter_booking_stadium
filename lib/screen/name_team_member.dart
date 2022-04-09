@@ -10,15 +10,18 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'booking_detail.dart';
+
 class NameTeamMember extends StatefulWidget {
   final SubStadiumModel subStadiumModel;
-  final time, bkt_id, std_id;
+  final time, bkt_id, std_id, getTime;
   const NameTeamMember(
       {Key? key,
       required this.subStadiumModel,
       this.time,
       this.bkt_id,
-      this.std_id})
+      this.std_id,
+      this.getTime})
       : super(key: key);
 
   @override
@@ -28,7 +31,14 @@ class NameTeamMember extends StatefulWidget {
 class _NameTeamMemberState extends State<NameTeamMember> {
   final _formKey = GlobalKey<FormState>();
   SubStadiumModel? subStadiumModel;
-  String? timeselect, player, name, std_id, bkd_member, substd_id, bkt_id;
+  String? timeselect,
+      player,
+      name,
+      std_id,
+      bkd_member,
+      substd_id,
+      bkt_id,
+      get_Time;
   List<String> savename = [];
   int? num;
   List<TextEditingController> listName = [];
@@ -43,8 +53,10 @@ class _NameTeamMemberState extends State<NameTeamMember> {
     bkt_id = widget.bkt_id;
     subStadiumModel = widget.subStadiumModel;
     timeselect = widget.time;
+    get_Time = widget.getTime;
     print("bkt_id is==>$bkt_id");
     print("this time ===>$timeselect");
+    print("get Time==>$get_Time");
     player = subStadiumModel!.stdNumberOfPlayer!;
     print("Player==>$player");
     //แปลงString-->int
@@ -68,7 +80,7 @@ class _NameTeamMemberState extends State<NameTeamMember> {
       print('จองได้ เวลากดจอง $currenttTimeOnTap');
       return true;
     } else {
-      print('จองไม่ได้ เวลากดจอง $currenttTimeOnTap');
+      print('ไม่สามารถจองได้ เวลากดจอง $currenttTimeOnTap');
       return false;
     }
   }
@@ -95,6 +107,40 @@ class _NameTeamMemberState extends State<NameTeamMember> {
     await Dio().get(url).then((value) {
       print('value is ===> $value');
       if (value.statusCode == 200) {
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          Text('บันทึกข้อมูลสำเร็จ'),
+                          Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => BookinDetail(
+                                                get_Time: get_Time,
+                                              )));
+                                },
+                                icon: Icon(
+                                  Icons.check_circle,
+                                  size: 50,
+                                  color: kPrimaryColor,
+                                ),
+                              )),
+                          SizedBox(
+                            height: 20,
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ));
         //Navigator.pop(context);
       } else {
         normalDialog(context, 'Please try again');
@@ -195,57 +241,47 @@ class _NameTeamMemberState extends State<NameTeamMember> {
                 style: TextStyle(fontSize: 20)),
             MyStyle().mySizebox(),
             Center(
-                child: Shortcuts(
-                    shortcuts: {},
-                    child: FocusTraversalGroup(
-                      child: Form(
-                        key: _formKey,
-                        autovalidateMode: AutovalidateMode.always,
-                        onChanged: () {
-                          Form.of(primaryFocus!.context!)!.save();
-                        },
-                        child: Wrap(
-                          children: List<Widget>.generate(number, (index) {
-                            listName.add(TextEditingController());
-                            return ConstrainedBox(
-                              constraints:
-                                  BoxConstraints.tight(const Size(350, 60)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextFormField(
-                                  controller: listName[index],
-                                  // onSaved: (newValue) {
-                                  //   name = newValue;
-                                  //   print("index:${index} name==>$name");
-
-                                  //   // savename.add(newValue!);
-                                  //   // print("is==>$savename");
-                                  // },
-                                  decoration: const InputDecoration(
-                                    labelText: 'ชื่อ-นามสกุล',
-                                    prefixIcon: Icon(
-                                      Icons.person,
-                                      color: kPrimaryColor,
-                                    ),
-                                    labelStyle: TextStyle(color: Colors.black),
-                                    enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide()),
-                                    focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide()),
-                                  ),
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return "กรุณากรอกชื่อผู้ใช้";
-                                    } else
-                                      return null;
-                                  },
-                                ),
-                              ),
-                            );
-                          }),
+                child: FocusTraversalGroup(
+              child: Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.always,
+                onChanged: () {
+                  Form.of(primaryFocus!.context!)!.save();
+                },
+                child: Wrap(
+                  children: List<Widget>.generate(number, (index) {
+                    listName.add(TextEditingController());
+                    return ConstrainedBox(
+                      constraints: BoxConstraints.tight(const Size(350, 60)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: listName[index],
+                          decoration: const InputDecoration(
+                            labelText: 'ชื่อ-นามสกุล',
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: kPrimaryColor,
+                            ),
+                            labelStyle: TextStyle(color: Colors.black),
+                            enabledBorder:
+                                OutlineInputBorder(borderSide: BorderSide()),
+                            focusedBorder:
+                                OutlineInputBorder(borderSide: BorderSide()),
+                          ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "กรุณากรอกชื่อผู้ใช้";
+                            } else
+                              return null;
+                          },
                         ),
                       ),
-                    ))),
+                    );
+                  }),
+                ),
+              ),
+            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -259,6 +295,10 @@ class _NameTeamMemberState extends State<NameTeamMember> {
                               borderRadius:
                                   BorderRadius.all(Radius.circular(15)))),
                       onPressed: () {
+                        setState(() {
+                          currentTime = DateTime.now();
+                          print("time==>$currentTime");
+                        });
                         if (_formKey.currentState!.validate()) {
                           for (var i = 0; i < number; i++) {
                             print("name $i ${listName[i].text}");

@@ -33,6 +33,11 @@ dependencies:
   intl: ^0.17.0
   time_range: ^1.0.2
   adaptive_scrollbar: ^2.1.2
+  cached_network_image: ^3.2.0
+  top_snackbar_flutter: ^1.0.2
+  
+  #motion_toast: ^2.1.5
+  #fluttertoast: ^8.0.4
   #fluttertoast: ^8.0.8
 
 dev_dependencies:
@@ -54,6 +59,8 @@ flutter:
   assets:
     - assets/images/backgroud.jpg
     - assets/images/completed.png
+    - assets/images/critical.png
+    - assets/images/futsal_field.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

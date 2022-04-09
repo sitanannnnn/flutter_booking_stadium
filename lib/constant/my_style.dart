@@ -14,14 +14,17 @@ class MyStyle {
     );
   }
 
-  // Image showLogo() {
-  //   return Image.asset('assets/images/1.jpg');
-  // }
+  // Image
+  static String image_stadium = 'assets/images/critical.png';
 
   Widget showProgress() {
     return const Center(
       child: CircularProgressIndicator(),
     );
+  }
+
+  Image showPicture() {
+    return Image.asset('assets/images/critical.png');
   }
 
   Image showBackgroud() {
