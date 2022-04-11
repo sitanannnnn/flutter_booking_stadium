@@ -26,13 +26,14 @@ class _BookingStadiumState extends State<BookingStadium> {
   StadiumModel? stadiumModel;
   List<SubStadiumModel> substadiumModels = [];
   List<TimeStadiumModel> timestadiumModels = [];
-  String? std_id, time, date, bkt_id, getTime;
+  String? std_id, time, date, bkt_id, getTime, substd_id;
   bool loadStatus = true;
   @override
   void initState() {
     super.initState();
     stadiumModel = widget.stadiumModel;
     std_id = stadiumModel!.stdId;
+
     print("std_id==> $std_id");
     readSubStadium().then((value) => readTimeStadium().then((value) {
           setState(() {
@@ -45,12 +46,64 @@ class _BookingStadiumState extends State<BookingStadium> {
     date = DateFormat('yyyy-MM-dd').format(dateTime);
   }
 
-  //เช็ควันที่เเละเวลาของการจองสนาม
+  //เช็ควันที่เเละเวลาของการจองสนามไม่มีสนามย่อย
   Future<void> cheackTimeBooking(int index) async {
     print("Time===>$time");
     print("Date===>$date");
     String url =
         '${Env().domaingetData}/getCheckBooking.php?isAdd=true&std_id=$std_id&bkd_date=$date&bkd_time=$time';
+    Response response = await Dio().get(url);
+    print('res is booking stadium = $response');
+    if (response.toString() == 'null') {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => NameTeamMember(
+                    subStadiumModel: substadiumModels[index],
+                    time: time,
+                    bkt_id: bkt_id,
+                    std_id: std_id,
+                    getTime: getTime,
+                  )));
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) => SimpleDialog(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        const Text('Please select ',
+                            style: TextStyle(fontSize: 25)),
+                        const Text(' another time. ',
+                            style: TextStyle(fontSize: 20)),
+                        ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.red,
+                                onPrimary: Colors.white,
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)))),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('OK'))
+                      ],
+                    ),
+                  ],
+                ),
+              ));
+    }
+  }
+
+  //เช็ควันที่เเละเวลาของการจองสนามมีสนามจอง
+  Future<void> cheackTimeBookingHaveSubstadium(int index) async {
+    print("Time===>$time");
+    print("Date===>$date");
+    print("SubStadium==>$substd_id");
+    String url =
+        '${Env().domaingetData}/getCheckBookingHaveSub.php?isAdd=true&substd_id=$substd_id&bkd_date=$date&bkd_time=$time';
     Response response = await Dio().get(url);
     print('res is booking stadium = $response');
     if (response.toString() == 'null') {
@@ -109,6 +162,7 @@ class _BookingStadiumState extends State<BookingStadium> {
       SubStadiumModel subStadiumModel = SubStadiumModel.fromJson(map);
       setState(() {
         substadiumModels.add(subStadiumModel);
+        print("Here==>${subStadiumModel.substdId}");
       });
     }
   }
@@ -234,44 +288,6 @@ class _BookingStadiumState extends State<BookingStadium> {
                             Container(
                                 height: 60,
                                 child: buildListViewTimeStadium(index)),
-                            // TimeList(
-                            //   timeStep: 60,
-                            //   activeTextStyle: const TextStyle(
-                            //     fontWeight: FontWeight.bold,
-                            //     color: Colors.white,
-                            //     fontSize: 20,
-                            //   ),
-
-                            //   borderColor: Colors.white,
-                            //   textStyle: const TextStyle(
-                            //       fontWeight: FontWeight.normal,
-                            //       color: Colors.white,
-                            //       fontSize: 20),
-
-                            //   activeBorderColor: kPrimaryLightColor,
-                            //   backgroundColor: kPrimaryColor,
-                            //   activeBackgroundColor: kPrimaryLightColor,
-                            //   firstTime: const TimeOfDay(hour: 18, minute: 00),
-                            //   lastTime: const TimeOfDay(hour: 20, minute: 00),
-                            //   onHourSelected: (TimeOfDay hour) {
-                            //     setState(() {
-                            //       time = hour.toString().substring(10, 15);
-                            //       print("Time  select $time");
-                            //       cheackTimeBooking(index);
-                            //     });
-                            //   },
-
-                            //   // onHourSelected: (TimeOfDay choosetime) {
-                            //   //   setState(() {
-                            //   //     cheackTimeBooking(index);
-
-                            //   //     // print('time =$choosetime');
-                            //   //     time =
-                            //   //         choosetime.toString().substring(10, 15);
-                            //   //     print("Time format =>$time");
-                            //   //   });
-                            //   // },
-                            // ),
                           ],
                         ),
                       ),
@@ -296,6 +312,7 @@ class _BookingStadiumState extends State<BookingStadium> {
               onPressed: () {
                 bkt_id = timestadiumModels[index2].bktId;
                 getTime = timestadiumModels[index2].bktStartTime;
+                substd_id = substadiumModels[index].substdId;
 
                 time = timestadiumModels[index2]
                     .bktStartTime
@@ -303,7 +320,10 @@ class _BookingStadiumState extends State<BookingStadium> {
                     .substring(0, 5);
                 print("Time==>$time");
                 print("bkt_id==>$bkt_id");
-                cheackTimeBooking(index);
+                print("is substadium==>$substd_id");
+                substadiumModels[index].substdId == 'null'
+                    ? cheackTimeBooking(index)
+                    : cheackTimeBookingHaveSubstadium(index);
                 // print(
                 //     "you click time===>${timestadiumModels[index2].bktStartTime}");
               },

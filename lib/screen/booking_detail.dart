@@ -12,7 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BookinDetail extends StatefulWidget {
   final get_Time;
-  const BookinDetail({Key? key, this.get_Time}) : super(key: key);
+  final substd_id;
+  const BookinDetail({Key? key, this.get_Time, this.substd_id})
+      : super(key: key);
 
   @override
   State<BookinDetail> createState() => _BookinDetailState();
@@ -21,7 +23,7 @@ class BookinDetail extends StatefulWidget {
 class _BookinDetailState extends State<BookinDetail> {
   List<BookingStadiumModel> bookingstadiumModels = [];
   bool loadStatus = true;
-  String? date, bkd_id, checkTime, getTime;
+  String? date, bkd_id, checkTime, getTime, substd_id;
   List<List<String>> listnameMembers = [];
   List<String> namemembers = [];
 
@@ -30,6 +32,8 @@ class _BookinDetailState extends State<BookinDetail> {
   void initState() {
     super.initState();
     getTime = widget.get_Time;
+    substd_id = widget.substd_id;
+    print("substd_id==>$substd_id");
     print("Get Time==>$getTime");
     readBookingStadium().then((value) {
       setState(() {
@@ -44,7 +48,7 @@ class _BookinDetailState extends State<BookinDetail> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? stu_id = preferences.getString("stu_id");
     String url =
-        '${Env().domaingetData}/getBookingStadium.php?isAdd=true&stu_id=$stu_id&bkd_date=$date&bkd_time=$getTime';
+        '${Env().domaingetData}/getBookingStadium.php?isAdd=true&stu_id=$stu_id&bkd_date=$date&bkd_time=$getTime&substd_id=$substd_id';
     Response response = await Dio().get(url);
     // print('res = $response');
     if (response.toString() == 'null') {

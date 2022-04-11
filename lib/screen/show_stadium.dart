@@ -450,53 +450,6 @@ class _ShowStadiumState extends State<ShowStadium> {
                                                               message:
                                                                   "กรุณาจองสนามภายในเวลา 09.00 น -15.00 น",
                                                             ));
-                                                    // showDialog(
-                                                    //     context: context,
-                                                    //     barrierDismissible:
-                                                    //         false, // user must tap button!
-                                                    //     builder:
-                                                    //         (BuildContext
-                                                    //             context) {
-                                                    //       return AlertDialog(
-                                                    //         content:
-                                                    //             SingleChildScrollView(
-                                                    //           child:
-                                                    //               ListBody(
-                                                    //             children: [
-                                                    //               Text(
-                                                    //                   "กรุณาจองสนามกีฬาภายในเวลา",
-                                                    //                   style: const TextStyle(
-                                                    //                       fontSize: 20,
-                                                    //                       fontWeight: FontWeight.bold)),
-                                                    //               Text(
-                                                    //                   "09.00 น -15.00 น",
-                                                    //                   style: const TextStyle(
-                                                    //                       fontSize: 20,
-                                                    //                       color: Colors.red)),
-                                                    //             ],
-                                                    //           ),
-                                                    //         ),
-                                                    //         actions: <
-                                                    //             Widget>[
-                                                    //           TextButton(
-                                                    //             child: const Text(
-                                                    //                 'ตกลง',
-                                                    //                 style: TextStyle(
-                                                    //                     fontSize:
-                                                    //                         20,
-                                                    //                     color:
-                                                    //                         Colors.blue)),
-                                                    //             onPressed:
-                                                    //                 () {
-                                                    //               Navigator.of(
-                                                    //                       context)
-                                                    //                   .pop();
-                                                    //             },
-                                                    //           ),
-                                                    //         ],
-                                                    //       );
-                                                    //     },
-                                                    //   );
                                                   },
                                                   child: const Text("จอง"))
                                               : Text(""),

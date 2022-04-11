@@ -125,6 +125,7 @@ class _NameTeamMemberState extends State<NameTeamMember> {
                                       MaterialPageRoute(
                                           builder: (context) => BookinDetail(
                                                 get_Time: get_Time,
+                                                substd_id: substd_id,
                                               )));
                                 },
                                 icon: Icon(

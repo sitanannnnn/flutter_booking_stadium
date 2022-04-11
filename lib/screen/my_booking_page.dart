@@ -5,6 +5,7 @@ import 'package:booking_stadium/constant/env.dart';
 import 'package:booking_stadium/constant/my_style.dart';
 import 'package:booking_stadium/constant/show_image.dart';
 import 'package:booking_stadium/model/booking_stadium_model.dart';
+import 'package:booking_stadium/screen/my_booking_detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -175,9 +176,10 @@ class _MyBookingState extends State<MyBooking> {
         body: loadStatus
             ? MyStyle().showProgress()
             : haveData!
-                ? SingleChildScrollView(
-                    child: buildDetail(),
-                  )
+                ? buildListViewBooking()
+                // SingleChildScrollView(
+                //     child: buildDetail(),
+                //   )
                 : Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -187,6 +189,177 @@ class _MyBookingState extends State<MyBooking> {
                       ],
                     ),
                   ));
+  }
+
+  ListView buildListViewBooking() {
+    return ListView.builder(
+        itemCount: bookingstadiumModels.length,
+        itemBuilder: (context, index) => GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyBookingDetail(
+                            bookingStadiumModel: bookingstadiumModels[index])));
+              },
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.90,
+                          height: MediaQuery.of(context).size.width * 0.35,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(10),
+                                topRight: Radius.circular(10),
+                                bottomLeft: Radius.circular(10),
+                                bottomRight: Radius.circular(10)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          margin: const EdgeInsets.all(5),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  child: CachedNetworkImage(
+                                    imageUrl:
+                                        '${Env().domaingetpicture}${bookingstadiumModels[index].stdUrlPicture}',
+
+                                    //filterQuality: FilterQuality.high,
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(0),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              '${Env().domaingetpicture}${bookingstadiumModels[index].stdUrlPicture}',
+                                            ),
+                                            fit: BoxFit.cover,
+                                          )),
+                                    ),
+                                    placeholder: (context, url) =>
+                                        MyStyle().showProgress(),
+                                    errorWidget: (context, url, error) =>
+                                        ShowImage(path: MyStyle.image_stadium),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.6,
+                                height:
+                                    MediaQuery.of(context).size.width * 0.35,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text("สนาม",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Expanded(
+                                            flex: 0,
+                                            child: Text(
+                                              bookingstadiumModels[index]
+                                                  .stdName!,
+                                              style:
+                                                  const TextStyle(fontSize: 18),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text("สนามย่อย",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          bookingstadiumModels[index]
+                                                      .substdId ==
+                                                  null
+                                              ? const Text("-",
+                                                  style:
+                                                      TextStyle(fontSize: 20))
+                                              : Expanded(
+                                                  flex: 0,
+                                                  child: Text(
+                                                    bookingstadiumModels[index]
+                                                        .substdName!,
+                                                    style: const TextStyle(
+                                                        fontSize: 18),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                )
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text("วันที่",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(
+                                            bookingstadiumModels[index]
+                                                .bkdDate!,
+                                            style:
+                                                const TextStyle(fontSize: 18),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text("เวลา",
+                                              style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(
+                                              "${bookingstadiumModels[index].bkdTime!.toString().substring(0, 5)} น.",
+                                              style:
+                                                  const TextStyle(fontSize: 18))
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ));
   }
 
   Widget buildDetail() => ListView.builder(
@@ -354,6 +527,8 @@ class _MyBookingState extends State<MyBooking> {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(15)))),
                         onPressed: () {
+                          String? bkd_id = bookingstadiumModels[index].bkdId;
+                          print("bkd_id===$bkd_id");
                           bkd_id = bookingstadiumModels[index].bkdId!;
                           checkTime =
                               TimeOfDay.now().toString().substring(10, 12);
